@@ -3,7 +3,8 @@
     "rootNamespace": "RiverDeutsch.Networking",
     "references": [
         "RiverDeutsch.Core",
-        "Unity.Netcode.Runtime"
+        "Unity.Netcode.Runtime",
+        "Unity.Networking.Transport"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
