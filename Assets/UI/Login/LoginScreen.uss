@@ -1,0 +1,175 @@
+/*
+ * Palette "Mystery Machine Glitch" : structure arcade/CRT conservee,
+ * couleurs rechauffees vers un carnaval hante 70s plutot que cyberpunk.
+ *   fond      #1A1108 (brun tres sombre)
+ *   accent A  #E8A33D (moutarde)
+ *   accent B  #C1440E (orange brule)
+ *   support   #5C6B3D (olive)
+ *   texte     #F5EBD8 (creme)
+ */
+
+.screen-root {
+    flex-grow: 1;
+    background-color: rgb(26, 17, 8);
+    align-items: center;
+    justify-content: center;
+}
+
+.retro-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.6;
+}
+
+.noise-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.12;
+}
+
+.login-content {
+    align-items: center;
+    justify-content: center;
+}
+
+.title-stack {
+    height: 100px;
+    width: 640px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.glitch-title {
+    position: absolute;
+    font-size: 64px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    width: 100%;
+}
+
+.glitch-title--accent-a {
+    color: rgb(232, 163, 61);
+    opacity: 0.7;
+}
+
+.glitch-title--accent-b {
+    color: rgb(193, 68, 14);
+    opacity: 0.7;
+}
+
+.glitch-title--base {
+    color: rgb(245, 235, 216);
+}
+
+.login-panel {
+    background-color: rgba(40, 27, 12, 0.92);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(232, 163, 61);
+    border-right-color: rgb(232, 163, 61);
+    border-top-color: rgb(232, 163, 61);
+    border-bottom-color: rgb(232, 163, 61);
+    padding: 30px;
+    width: 400px;
+    align-items: stretch;
+}
+
+.login-title {
+    font-size: 26px;
+    color: rgb(193, 68, 14);
+    -unity-text-align: middle-center;
+    margin-bottom: 18px;
+}
+
+.login-input {
+    background-color: rgba(232, 163, 61, 0.1);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(232, 163, 61);
+    color: rgb(245, 235, 216);
+    margin-bottom: 12px;
+}
+
+.login-input:focus {
+    background-color: rgba(193, 68, 14, 0.18);
+    border-bottom-color: rgb(193, 68, 14);
+}
+
+.button-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 6px;
+}
+
+.menu-btn {
+    background-color: rgba(0, 0, 0, 0.55);
+    color: rgb(245, 235, 216);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-left-color: rgb(232, 163, 61);
+    border-right-color: rgb(232, 163, 61);
+    border-top-color: rgb(232, 163, 61);
+    border-bottom-color: rgb(232, 163, 61);
+    padding: 8px 20px;
+    margin-top: 10px;
+    rotate: -2deg;
+    -unity-text-align: middle-center;
+    font-size: 18px;
+    transition-property: background-color, color, border-left-color, border-right-color, border-top-color, border-bottom-color, rotate;
+    transition-duration: 0.15s;
+}
+
+.menu-btn:hover {
+    background-color: rgb(232, 163, 61);
+    color: rgb(26, 17, 8);
+    border-left-color: rgb(193, 68, 14);
+    border-right-color: rgb(193, 68, 14);
+    border-top-color: rgb(193, 68, 14);
+    border-bottom-color: rgb(193, 68, 14);
+    rotate: 0deg;
+}
+
+.menu-btn--quit {
+    border-left-color: rgb(92, 107, 61);
+    border-right-color: rgb(92, 107, 61);
+    border-top-color: rgb(92, 107, 61);
+    border-bottom-color: rgb(92, 107, 61);
+    align-self: center;
+}
+
+.menu-btn--quit:hover {
+    background-color: rgb(92, 107, 61);
+    color: rgb(245, 235, 216);
+    border-left-color: rgb(193, 68, 14);
+    border-right-color: rgb(193, 68, 14);
+    border-top-color: rgb(193, 68, 14);
+    border-bottom-color: rgb(193, 68, 14);
+}
+
+.status-label {
+    color: rgb(232, 163, 61);
+    margin-top: 14px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}

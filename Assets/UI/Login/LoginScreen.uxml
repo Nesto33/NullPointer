@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="screen-root" class="screen-root">
+        <ui:VisualElement name="retro-grid" class="retro-grid" picking-mode="Ignore" />
+        <ui:VisualElement name="noise-layer" class="noise-layer" picking-mode="Ignore" />
+        <ui:VisualElement name="scanlines" class="scanlines" picking-mode="Ignore" />
+
+        <ui:VisualElement name="login-content" class="login-content">
+            <ui:VisualElement name="title-stack" class="title-stack">
+                <ui:Label name="title-accent-a" text="NULL POINTER" class="glitch-title glitch-title--accent-a" />
+                <ui:Label name="title-accent-b" text="NULL POINTER" class="glitch-title glitch-title--accent-b" />
+                <ui:Label name="title-base" text="NULL POINTER" class="glitch-title glitch-title--base" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="login-panel" class="login-panel">
+                <ui:Label text="SYSTEM_ACCESS" class="login-title" />
+
+                <ui:TextField label="PSEUDO" name="pseudo-field" value="Player" class="login-input" />
+                <ui:TextField label="ADRESSE" name="address-field" value="127.0.0.1" class="login-input" />
+                <ui:TextField label="PORT" name="port-field" value="7777" class="login-input" />
+
+                <ui:VisualElement name="button-row" class="button-row">
+                    <ui:Button name="host-button" text="HEBERGER" class="menu-btn" />
+                    <ui:Button name="join-button" text="REJOINDRE" class="menu-btn" />
+                </ui:VisualElement>
+
+                <ui:Label name="status-label" text="" class="status-label" />
+
+                <ui:Button name="quit-button" text="SYSTEM_SHUTDOWN" class="menu-btn menu-btn--quit" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
