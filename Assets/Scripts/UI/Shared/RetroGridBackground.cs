@@ -32,8 +32,8 @@ namespace RiverDeutsch.UI.Shared
             int h = Mathf.Max(1, Mathf.RoundToInt(evt.newRect.height));
 
             var texture = new Texture2D(w, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
-            var cyan = new Color(0f, 1f, 1f, 0.2f);
-            var magenta = new Color(1f, 0f, 1f, 0.2f);
+            var mustard = new Color(232f / 255f, 163f / 255f, 61f / 255f, 0.15f);
+            var burntOrange = new Color(193f / 255f, 68f / 255f, 14f / 255f, 0.15f);
             var clear = new Color(0f, 0f, 0f, 0f);
 
             var pixels = new Color[w * h];
@@ -43,7 +43,7 @@ namespace RiverDeutsch.UI.Shared
                 for (int x = 0; x < w; x++)
                 {
                     bool verticalLine = x % cellSize == 0;
-                    pixels[y * w + x] = verticalLine ? cyan : (horizontalLine ? magenta : clear);
+                    pixels[y * w + x] = verticalLine ? mustard : (horizontalLine ? burntOrange : clear);
                 }
             }
 

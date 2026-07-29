@@ -6,9 +6,9 @@
 
         <ui:VisualElement name="login-content" class="login-content">
             <ui:VisualElement name="title-stack" class="title-stack">
-                <ui:Label name="title-cyan" text="NULL POINTER" class="glitch-title glitch-title--cyan" />
-                <ui:Label name="title-magenta" text="NULL POINTER" class="glitch-title glitch-title--magenta" />
-                <ui:Label name="title-white" text="NULL POINTER" class="glitch-title glitch-title--white" />
+                <ui:Label name="title-accent-a" text="NULL POINTER" class="glitch-title glitch-title--accent-a" />
+                <ui:Label name="title-accent-b" text="NULL POINTER" class="glitch-title glitch-title--accent-b" />
+                <ui:Label name="title-base" text="NULL POINTER" class="glitch-title glitch-title--base" />
             </ui:VisualElement>
 
             <ui:VisualElement name="login-panel" class="login-panel">
