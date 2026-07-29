@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="LoginScreen.uss" />
     <ui:VisualElement name="screen-root" class="screen-root">
         <ui:VisualElement name="retro-grid" class="retro-grid" picking-mode="Ignore" />
         <ui:VisualElement name="noise-layer" class="noise-layer" picking-mode="Ignore" />
