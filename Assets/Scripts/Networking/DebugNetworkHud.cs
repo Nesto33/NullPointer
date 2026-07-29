@@ -23,7 +23,10 @@ namespace RiverDeutsch.Networking
 
         private void Start()
         {
-            NetworkManager.Singleton.OnClientConnectedCallback += id => Log($"Connected as client {id}");
+            if (NetworkManager.Singleton != null)
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback += id => Log($"Connected as client {id}");
+            }
         }
 
         private void Update()
@@ -51,9 +54,11 @@ namespace RiverDeutsch.Networking
 
         private void OnGUI()
         {
+            var nm = NetworkManager.Singleton;
+            if (nm == null) return; // not initialized yet, or torn down (e.g. exiting Play Mode)
+
             GUILayout.BeginArea(new Rect(10, 10, 420, Screen.height - 20), GUI.skin.box);
 
-            var nm = NetworkManager.Singleton;
             if (!nm.IsClient && !nm.IsServer)
             {
                 GUILayout.Label("RiverDeutsch — Debug Network HUD");
