@@ -216,3 +216,36 @@
     -unity-text-align: middle-center;
     white-space: normal;
 }
+
+/* Darkened frame around the screen, like watching through a CRT/tape lens */
+.vignette-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Two panels that shrink away from the center on load, like an old CRT
+   warming up — see TvPowerOnEffect.cs. Their touching edges get a bright
+   border so the seam between them reads as the tube's scan line. */
+.tv-mask {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: rgb(4, 2, 1);
+}
+
+.tv-mask--top {
+    top: 0;
+    height: 50%;
+    border-bottom-width: 4px;
+    border-bottom-color: rgb(245, 235, 216);
+}
+
+.tv-mask--bottom {
+    bottom: 0;
+    height: 50%;
+    border-top-width: 4px;
+    border-top-color: rgb(245, 235, 216);
+}

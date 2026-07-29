@@ -29,5 +29,10 @@
                 <ui:Button name="quit-button" text="SYSTEM_SHUTDOWN" class="menu-btn menu-btn--quit" />
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <ui:VisualElement name="vignette-layer" class="vignette-layer" picking-mode="Ignore" />
+
+        <ui:VisualElement name="tv-mask-top" class="tv-mask tv-mask--top" />
+        <ui:VisualElement name="tv-mask-bottom" class="tv-mask tv-mask--bottom" />
     </ui:VisualElement>
 </ui:UXML>
