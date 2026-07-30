@@ -33,6 +33,12 @@ namespace RiverDeutsch.UI.Shared
             StartCoroutine(PlayPowerOn(top, bottom, noise));
         }
 
+        // The very first frame after entering Play Mode (or loading this scene) often
+        // reports a hugely inflated Time.deltaTime — it bundles in load/compile time.
+        // Counting that would eat most of the animation in a single step, so every
+        // hand-timed loop below skips a frame first and clamps its per-frame delta.
+        private const float MaxStepSeconds = 0.05f;
+
         private IEnumerator PlayPowerOn(VisualElement top, VisualElement bottom, VisualElement noise)
         {
             top.style.height = Length.Percent(50);
@@ -41,11 +47,13 @@ namespace RiverDeutsch.UI.Shared
             bottom.pickingMode = PickingMode.Position;
             if (noise != null) noise.style.opacity = crackleOpacity;
 
+            yield return null; // let the inflated first-frame delta pass unused
+
             // Hold on black for a beat, tube "warming up".
             float elapsed = 0f;
             while (elapsed < holdDuration)
             {
-                elapsed += Time.unscaledDeltaTime;
+                elapsed += Mathf.Min(Time.unscaledDeltaTime, MaxStepSeconds);
                 yield return null;
             }
 
@@ -53,7 +61,7 @@ namespace RiverDeutsch.UI.Shared
             elapsed = 0f;
             while (elapsed < revealDuration)
             {
-                elapsed += Time.unscaledDeltaTime;
+                elapsed += Mathf.Min(Time.unscaledDeltaTime, MaxStepSeconds);
                 float t = Mathf.Clamp01(elapsed / revealDuration);
                 float eased = 1f - Mathf.Pow(1f - t, 3f);
                 float percent = Mathf.Lerp(50f, 0f, eased);
@@ -75,7 +83,7 @@ namespace RiverDeutsch.UI.Shared
                 elapsed = 0f;
                 while (elapsed < crackleTailDuration)
                 {
-                    elapsed += Time.unscaledDeltaTime;
+                    elapsed += Mathf.Min(Time.unscaledDeltaTime, MaxStepSeconds);
                     float t = Mathf.Clamp01(elapsed / crackleTailDuration);
                     noise.style.opacity = Mathf.Lerp(crackleOpacity, 0.12f, t);
                     yield return null;
