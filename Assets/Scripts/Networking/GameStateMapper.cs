@@ -70,9 +70,9 @@ namespace RiverDeutsch.Networking
         {
             if (!reveal)
             {
-                return new CardDto { Known = false, Rank = 0, Suit = null, IsFaceUp = card.IsFaceUp };
+                return new CardDto { Known = false, Rank = 0, Suit = null, IsFaceUp = card.IsFaceUp, Power = Card.PowerType.None.ToString() };
             }
-            return new CardDto { Known = true, Rank = card.Rank, Suit = card.Suit, IsFaceUp = card.IsFaceUp };
+            return new CardDto { Known = true, Rank = card.Rank, Suit = card.Suit, IsFaceUp = card.IsFaceUp, Power = card.Power.ToString() };
         }
     }
 }

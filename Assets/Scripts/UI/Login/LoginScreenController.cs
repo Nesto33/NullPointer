@@ -1,5 +1,7 @@
 using System.Collections;
 using RiverDeutsch.Networking;
+using RiverDeutsch.Networking.Dto;
+using RiverDeutsch.UI.Table;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using UnityEngine;
@@ -11,11 +13,16 @@ namespace RiverDeutsch.UI.Login
     /// Wires the LoginScreen UXML to the network layer: HEBERGER starts a host and
     /// REJOINDRE starts a client against the given address/port, then both send
     /// ConnectServerRpc with the chosen pseudo once the session object is ready.
+    /// Also owns the one-way handoff to the game table once GAME_STARTED arrives.
     /// </summary>
     public class LoginScreenController : MonoBehaviour
     {
         [SerializeField] private UIDocument document;
         [SerializeField] private Font retroFont;
+
+        [Header("Game table handoff")]
+        [SerializeField] private GameObject gameTableRoot;
+        [SerializeField] private GameTableController gameTableController;
 
         private TextField pseudoField;
         private TextField addressField;
@@ -52,6 +59,12 @@ namespace RiverDeutsch.UI.Login
             hostButton.clicked -= OnHostClicked;
             joinButton.clicked -= OnJoinClicked;
             quitButton.clicked -= OnQuitClicked;
+
+            if (NetworkGameSession.Instance != null)
+            {
+                NetworkGameSession.Instance.OnLobbyStateReceived -= HandleLobbyState;
+                NetworkGameSession.Instance.OnGameStateReceived -= HandleGameStateForHandoff;
+            }
         }
 
         private void OnHostClicked()
@@ -125,13 +138,30 @@ namespace RiverDeutsch.UI.Login
             yield return new WaitUntil(() => NetworkGameSession.Instance != null);
 
             string pseudo = string.IsNullOrWhiteSpace(pseudoField.value) ? "Player" : pseudoField.value.Trim();
+            NetworkGameSession.Instance.LocalPlayerName = pseudo;
             NetworkGameSession.Instance.OnLobbyStateReceived += HandleLobbyState;
+            NetworkGameSession.Instance.OnGameStateReceived += HandleGameStateForHandoff;
             NetworkGameSession.Instance.ConnectServerRpc(pseudo);
         }
 
         private void HandleLobbyState(int playerCount)
         {
             SetStatus($"Connecte. {playerCount} joueur(s) dans le lobby.");
+        }
+
+        /// <summary>Watches for the match actually starting, then swaps this screen out
+        /// for the game table and forwards it the very state update that started it —
+        /// GameTableController's own subscription only begins once it's enabled, which
+        /// would otherwise miss this first payload.</summary>
+        private void HandleGameStateForHandoff(string action, GameStateDto dto)
+        {
+            if (action != "GAME_STARTED") return;
+            NetworkGameSession.Instance.OnGameStateReceived -= HandleGameStateForHandoff;
+
+            if (gameTableRoot != null) gameTableRoot.SetActive(true);
+            if (gameTableController != null) gameTableController.HandleGameState(action, dto);
+
+            gameObject.SetActive(false);
         }
 
         private void OnQuitClicked()

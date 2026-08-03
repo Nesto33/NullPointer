@@ -1,0 +1,59 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="GameTable.uss" />
+    <ui:VisualElement name="table-root" class="table-root">
+        <ui:VisualElement name="vignette-layer" class="vignette-layer" picking-mode="Ignore" />
+        <ui:VisualElement name="scanlines" class="scanlines" picking-mode="Ignore" />
+        <ui:VisualElement name="noise-layer" class="noise-layer" picking-mode="Ignore" />
+
+        <ui:VisualElement name="board-layout" class="board-layout">
+            <ui:VisualElement name="opponent-top" class="opponent-row" />
+
+            <ui:VisualElement name="middle-row" class="middle-row">
+                <ui:VisualElement name="opponent-left" class="opponent-col opponent-col--left" />
+
+                <ui:VisualElement name="center-area" class="center-area">
+                    <ui:Label text="RIVIERE" class="section-label" />
+                    <ui:VisualElement name="river-row" class="card-row" />
+
+                    <ui:VisualElement name="piles-row" class="piles-row">
+                        <ui:VisualElement name="deck-pile" class="pile">
+                            <ui:Label name="deck-label" text="PIOCHE (0)" class="pile-label" />
+                            <ui:VisualElement name="deck-card-slot" class="card-slot" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="discard-pile" class="pile">
+                            <ui:Label text="DEFAUSSE" class="pile-label" />
+                            <ui:VisualElement name="discard-card-slot" class="card-slot" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement name="opponent-right" class="opponent-col opponent-col--right" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="local-hand-container" class="local-hand-container">
+                <ui:Label name="local-name-label" text="VOUS" class="player-label" />
+                <ui:VisualElement name="local-hand-row" class="card-row card-row--local" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="hud-layer" class="hud-layer" picking-mode="Ignore">
+            <ui:VisualElement name="turn-indicator" class="turn-indicator">
+                <ui:Label text="TOUR" class="turn-indicator-label" />
+                <ui:Label name="turn-player-label" text="" class="turn-indicator-value" />
+            </ui:VisualElement>
+
+            <ui:Button name="shutdown-button" text="SHUTDOWN !" class="menu-btn shutdown-btn" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="toast-layer" class="toast-layer" picking-mode="Ignore" />
+
+        <ui:VisualElement name="pending-card-overlay" class="pending-card-overlay">
+            <ui:VisualElement name="pending-card-panel" class="pending-card-panel">
+                <ui:Label text="CARTE PIOCHEE" class="login-title" />
+                <ui:VisualElement name="pending-card-slot" class="card-slot card-slot--large" />
+                <ui:Label text="CLIQUEZ SUR UNE DE VOS CARTES POUR L'ECHANGER" class="pending-instruction" />
+                <ui:Button name="discard-pending-button" text="JETER (DEFAUSSE)" class="menu-btn menu-btn--quit" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

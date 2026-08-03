@@ -23,6 +23,10 @@ namespace RiverDeutsch.Networking
     {
         public static NetworkGameSession Instance { get; private set; }
 
+        /// <summary>The pseudo this client connected with — set client-side right before
+        /// ConnectServerRpc, so UI layers can tell which player/hand in a GameStateDto is "us".</summary>
+        public string LocalPlayerName { get; set; }
+
         public event Action<string, GameStateDto> OnGameStateReceived;
         public event Action<int> OnLobbyStateReceived;
         public event Action<string> OnDeutschCalled;
