@@ -30,6 +30,7 @@ namespace RiverDeutsch.UI.Login
         private Button hostButton;
         private Button joinButton;
         private Button quitButton;
+        private Button startMatchButton;
         private Label statusLabel;
 
         private void OnEnable()
@@ -47,11 +48,15 @@ namespace RiverDeutsch.UI.Login
             hostButton = root.Q<Button>("host-button");
             joinButton = root.Q<Button>("join-button");
             quitButton = root.Q<Button>("quit-button");
+            startMatchButton = root.Q<Button>("start-match-button");
             statusLabel = root.Q<Label>("status-label");
+
+            startMatchButton.SetEnabled(false);
 
             hostButton.clicked += OnHostClicked;
             joinButton.clicked += OnJoinClicked;
             quitButton.clicked += OnQuitClicked;
+            startMatchButton.clicked += OnStartMatchClicked;
         }
 
         private void OnDisable()
@@ -59,6 +64,7 @@ namespace RiverDeutsch.UI.Login
             hostButton.clicked -= OnHostClicked;
             joinButton.clicked -= OnJoinClicked;
             quitButton.clicked -= OnQuitClicked;
+            startMatchButton.clicked -= OnStartMatchClicked;
 
             if (NetworkGameSession.Instance != null)
             {
@@ -147,6 +153,12 @@ namespace RiverDeutsch.UI.Login
         private void HandleLobbyState(int playerCount)
         {
             SetStatus($"Connecte. {playerCount} joueur(s) dans le lobby.");
+            startMatchButton.SetEnabled(playerCount >= 2);
+        }
+
+        private void OnStartMatchClicked()
+        {
+            NetworkGameSession.Instance?.StartMatchServerRpc();
         }
 
         /// <summary>Watches for the match actually starting, then swaps this screen out

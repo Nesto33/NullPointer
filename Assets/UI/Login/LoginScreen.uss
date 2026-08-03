@@ -210,6 +210,15 @@
     border-bottom-color: rgb(193, 68, 14);
 }
 
+.menu-btn--start {
+    align-self: center;
+}
+
+.menu-btn:disabled {
+    opacity: 0.35;
+    rotate: -2deg;
+}
+
 .status-label {
     color: rgb(232, 163, 61);
     margin-top: 14px;

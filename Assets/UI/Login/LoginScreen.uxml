@@ -26,6 +26,8 @@
 
                 <ui:Label name="status-label" text="" class="status-label" />
 
+                <ui:Button name="start-match-button" text="LANCER LA PARTIE" class="menu-btn menu-btn--start" />
+
                 <ui:Button name="quit-button" text="SYSTEM_SHUTDOWN" class="menu-btn menu-btn--quit" />
             </ui:VisualElement>
         </ui:VisualElement>
