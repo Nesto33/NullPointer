@@ -42,11 +42,20 @@ namespace RiverDeutsch.UI.Table
         private GameStateDto latestState;
         private string lastToastKey;
         private bool subscribedToSession;
+        private bool uiReady;
+        private string pendingAction;
+        private GameStateDto pendingState;
 
         private string LocalPlayerName => NetworkGameSession.Instance != null ? NetworkGameSession.Instance.LocalPlayerName : null;
 
         private void OnEnable()
         {
+            if (document == null)
+            {
+                Debug.LogError("GameTableController: 'Document' is not assigned in the inspector.");
+                return;
+            }
+
             VisualElement root = document.rootVisualElement;
 
             tableRoot = root.Q<VisualElement>("table-root");
@@ -75,13 +84,28 @@ namespace RiverDeutsch.UI.Table
             deckCardSlot.RegisterCallback<ClickEvent>(OnDeckClicked);
             shutdownButton.clicked += OnShutdownClicked;
             discardPendingButton.clicked += OnDiscardPendingClicked;
+
+            uiReady = true;
+
+            // If HandleGameState was called (e.g. by the login->table handoff) before
+            // this ran, apply it now instead of leaving the table blank.
+            if (pendingState != null)
+            {
+                string action = pendingAction;
+                GameStateDto dto = pendingState;
+                pendingAction = null;
+                pendingState = null;
+                HandleGameState(action, dto);
+            }
         }
 
         private void OnDisable()
         {
-            deckCardSlot.UnregisterCallback<ClickEvent>(OnDeckClicked);
-            shutdownButton.clicked -= OnShutdownClicked;
-            discardPendingButton.clicked -= OnDiscardPendingClicked;
+            uiReady = false;
+
+            if (deckCardSlot != null) deckCardSlot.UnregisterCallback<ClickEvent>(OnDeckClicked);
+            if (shutdownButton != null) shutdownButton.clicked -= OnShutdownClicked;
+            if (discardPendingButton != null) discardPendingButton.clicked -= OnDiscardPendingClicked;
 
             if (NetworkGameSession.Instance != null)
             {
@@ -107,6 +131,15 @@ namespace RiverDeutsch.UI.Table
         /// event too late and leave the table blank until the next update.</summary>
         public void HandleGameState(string action, GameStateDto dto)
         {
+            if (!uiReady)
+            {
+                // OnEnable hasn't finished querying the UXML yet — remember this and
+                // apply it as soon as it does, instead of hitting null UI references.
+                pendingAction = action;
+                pendingState = dto;
+                return;
+            }
+
             string previousCurrentPlayer = latestState?.CurrentPlayerName;
             latestState = dto;
 
