@@ -5,9 +5,9 @@ using UnityEngine.UIElements;
 namespace RiverDeutsch.UI.Shared
 {
     /// <summary>
-    /// Plays an old-CRT power-on once when the screen loads: a held black frame with
-    /// crackling static, then two masks shrink away from a bright center seam to
-    /// reveal the actual UI, like a tube warming up.
+    /// Plays an old-CRT power-on once when the screen loads: a few hesitant flickers,
+    /// a held black frame with crackling static, then two masks shrink away from a
+    /// bright center seam to reveal the actual UI, like a tube warming up.
     /// </summary>
     public class TvPowerOnEffect : MonoBehaviour
     {
@@ -16,10 +16,14 @@ namespace RiverDeutsch.UI.Shared
         [SerializeField] private string bottomMaskElementName = "tv-mask-bottom";
         [SerializeField] private string noiseLayerElementName = "noise-layer";
 
-        [SerializeField] private float holdDuration = 0.18f;
-        [SerializeField] private float revealDuration = 0.45f;
-        [SerializeField] private float crackleTailDuration = 0.3f;
+        [Header("Timings (seconds)")]
+        [SerializeField] private float[] flickerOnDurations = { 0.10f, 0.08f, 0.06f };
+        [SerializeField] private float[] flickerOffDurations = { 0.22f, 0.16f, 0.10f };
+        [SerializeField] private float holdDuration = 0.6f;
+        [SerializeField] private float revealDuration = 1.4f;
+        [SerializeField] private float crackleTailDuration = 0.8f;
         [SerializeField] private float crackleOpacity = 0.75f;
+        [SerializeField] private float flickerOpacity = 0.9f;
 
         private void OnEnable()
         {
@@ -45,20 +49,27 @@ namespace RiverDeutsch.UI.Shared
             bottom.style.height = Length.Percent(50);
             top.pickingMode = PickingMode.Position;
             bottom.pickingMode = PickingMode.Position;
-            if (noise != null) noise.style.opacity = crackleOpacity;
+            if (noise != null) noise.style.opacity = 0f;
 
             yield return null; // let the inflated first-frame delta pass unused
 
-            // Hold on black for a beat, tube "warming up".
-            float elapsed = 0f;
-            while (elapsed < holdDuration)
+            // A few hesitant flickers before the tube commits to staying on.
+            int flickerCount = Mathf.Min(flickerOnDurations.Length, flickerOffDurations.Length);
+            for (int i = 0; i < flickerCount; i++)
             {
-                elapsed += Mathf.Min(Time.unscaledDeltaTime, MaxStepSeconds);
-                yield return null;
+                if (noise != null) noise.style.opacity = flickerOpacity;
+                yield return WaitFor(flickerOnDurations[i]);
+
+                if (noise != null) noise.style.opacity = 0.05f;
+                yield return WaitFor(flickerOffDurations[i]);
             }
 
+            // Hold on black for a beat, tube "warming up".
+            if (noise != null) noise.style.opacity = crackleOpacity;
+            yield return WaitFor(holdDuration);
+
             // Masks shrink away from the center seam, ease-out.
-            elapsed = 0f;
+            float elapsed = 0f;
             while (elapsed < revealDuration)
             {
                 elapsed += Mathf.Min(Time.unscaledDeltaTime, MaxStepSeconds);
@@ -89,6 +100,16 @@ namespace RiverDeutsch.UI.Shared
                     yield return null;
                 }
                 noise.style.opacity = StyleKeyword.Null;
+            }
+        }
+
+        private static IEnumerator WaitFor(float duration)
+        {
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Mathf.Min(Time.unscaledDeltaTime, MaxStepSeconds);
+                yield return null;
             }
         }
     }
