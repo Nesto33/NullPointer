@@ -233,12 +233,19 @@ namespace RiverDeutsch.UI.Table
 
             List<CardDto> previousHand = FindHand(previous, localName);
 
+            // Balatro-style fan: cards toward the edges of the hand rest at a small
+            // outward rotation and dip slightly, instead of all sitting dead flat.
+            float fanCenter = (localPlayer.Hand.Count - 1) / 2f;
+
             for (int i = 0; i < localPlayer.Hand.Count; i++)
             {
                 int cardIndex = i;
                 CardDto card = localPlayer.Hand[i];
                 CardDto previousCard = SameLength(previousHand, localPlayer.Hand) ? previousHand[i] : null;
-                VisualElement slot = CreateCardSlot(card, previousCard, large: false, sway: true, swayPhase: i * 0.9f);
+                float fanOffset = i - fanCenter;
+                float baseRotation = fanOffset * 6f;
+                float baseOffsetY = Mathf.Abs(fanOffset) * 5f;
+                VisualElement slot = CreateCardSlot(card, previousCard, large: false, sway: true, swayPhase: i * 0.9f, baseRotation: baseRotation, baseOffsetY: baseOffsetY);
 
                 if (powerWaiting && isMyTurn && IsHandTargetable(activePower, isOpponent: false))
                 {
@@ -503,7 +510,7 @@ namespace RiverDeutsch.UI.Table
             };
         }
 
-        private VisualElement CreateCardSlot(CardDto card, CardDto previousCard, bool large, bool smaller = false, bool sway = false, float swayPhase = 0f)
+        private VisualElement CreateCardSlot(CardDto card, CardDto previousCard, bool large, bool smaller = false, bool sway = false, float swayPhase = 0f, float baseRotation = 0f, float baseOffsetY = 0f)
         {
             var slot = new VisualElement();
             slot.AddToClassList("card-slot");
@@ -517,24 +524,52 @@ namespace RiverDeutsch.UI.Table
             bool justRevealed = previousCard != null && previousCard.Known != card.Known;
             ApplyCardVisual(slot, justRevealed ? previousCard : card);
             if (justRevealed) StartCoroutine(FlipRoutine(slot, card));
-            if (sway) StartCoroutine(SwayRoutine(slot, swayPhase));
+            if (sway) StartCoroutine(CardMotionRoutine(slot, swayPhase, baseRotation, baseOffsetY));
 
             return slot;
         }
 
-        /// <summary>Small idle rotate/bob loop so hand cards feel alive even when
-        /// nobody's interacting with them, each on its own phase so they don't all
-        /// move in lockstep. Stops on its own once the slot leaves the panel.</summary>
-        private static IEnumerator SwayRoutine(VisualElement slot, float phase)
+        /// <summary>Idle rotate/bob loop around the card's fan resting pose when nobody's
+        /// interacting with it; when the pointer is over the card this instead drives a
+        /// tilt/lift toward the cursor (a 2D stand-in for the video's 3D hover rotation).
+        /// The two never touch style.rotate/translate on the same frame, so they can't
+        /// fight each other for control of those properties.</summary>
+        private static IEnumerator CardMotionRoutine(VisualElement slot, float phase, float baseRotation, float baseOffsetY)
         {
+            bool hovering = false;
+            float pointerX = 0f;
+            float pointerY = 0f;
+
+            slot.RegisterCallback<PointerEnterEvent>(_ => hovering = true);
+            slot.RegisterCallback<PointerLeaveEvent>(_ => hovering = false);
+            slot.RegisterCallback<PointerMoveEvent>(evt =>
+            {
+                Rect layout = slot.layout;
+                if (layout.width <= 0f || layout.height <= 0f) return;
+                pointerX = Mathf.Clamp((evt.localPosition.x / layout.width) * 2f - 1f, -1f, 1f);
+                pointerY = Mathf.Clamp((evt.localPosition.y / layout.height) * 2f - 1f, -1f, 1f);
+            });
+
             float t = phase;
             while (slot.panel != null)
             {
                 t += Mathf.Min(Time.unscaledDeltaTime, StepSeconds);
-                float angle = Mathf.Sin(t * 1.1f) * 1.5f;
-                float bob = Mathf.Sin(t * 1.4f + 1f) * 2f;
-                slot.style.rotate = new Rotate(angle);
-                slot.style.translate = new Translate(0, bob);
+
+                if (hovering)
+                {
+                    float tilt = baseRotation - pointerX * 6f;
+                    float lift = baseOffsetY - 10f - pointerY * 4f;
+                    slot.style.rotate = new Rotate(tilt);
+                    slot.style.translate = new Translate(pointerX * 3f, lift);
+                }
+                else
+                {
+                    float angle = baseRotation + Mathf.Sin(t * 1.1f) * 1.2f;
+                    float bob = baseOffsetY + Mathf.Sin(t * 1.4f + 1f) * 2f;
+                    slot.style.rotate = new Rotate(angle);
+                    slot.style.translate = new Translate(0, bob);
+                }
+
                 yield return null;
             }
         }
