@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="../Shared/Theme.uss" />
     <Style src="GameTable.uss" />
     <ui:VisualElement name="table-root" class="table-root">
         <ui:VisualElement name="vignette-layer" class="vignette-layer" picking-mode="Ignore" />
@@ -47,13 +48,27 @@
 
         <ui:VisualElement name="toast-layer" class="toast-layer" picking-mode="Ignore" />
 
-        <ui:VisualElement name="pending-card-overlay" class="pending-card-overlay">
+        <ui:VisualElement name="pending-card-overlay" class="pending-card-overlay" picking-mode="Ignore">
             <ui:VisualElement name="pending-card-panel" class="pending-card-panel">
-                <ui:Label text="CARTE PIOCHEE" class="login-title" />
+                <ui:Label text="CARTE PIOCHEE" class="pending-card-title" />
                 <ui:VisualElement name="pending-card-slot" class="card-slot card-slot--large" />
                 <ui:Label text="CLIQUEZ SUR UNE DE VOS CARTES POUR L'ECHANGER" class="pending-instruction" />
                 <ui:Button name="discard-pending-button" text="JETER (DEFAUSSE)" class="menu-btn menu-btn--quit" />
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="power-popup-overlay" class="power-popup-overlay" picking-mode="Ignore">
+            <ui:VisualElement name="power-popup-panel" class="power-popup-panel">
+                <ui:VisualElement name="power-popup-icon" class="power-popup-icon" />
+                <ui:Label name="power-popup-name" text="" class="power-popup-name" />
+                <ui:Label name="power-popup-description" text="" class="power-popup-description" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="countdown-overlay" class="countdown-overlay">
+            <ui:Label text="DEBUT DE LA PARTIE" class="countdown-title" />
+            <ui:VisualElement name="countdown-players" class="countdown-players" />
+            <ui:Label name="countdown-number" text="" class="countdown-number" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

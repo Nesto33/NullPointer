@@ -17,9 +17,9 @@ namespace RiverDeutsch.UI.Table
     /// against the previous state (by hand/river position) so a card flipping from
     /// hidden to known can play a flip animation instead of instantly swapping.
     ///
-    /// Deferred for a follow-up pass: round-end score screen, game-end victory
-    /// screen, the power-activation popup, and the pre-round countdown. For now the
-    /// board just keeps rendering through those transitions.
+    /// Deferred for a follow-up pass: the round-end score screen and the game-end
+    /// victory screen. For now the board just keeps rendering through those
+    /// transitions.
     /// </summary>
     public class GameTableController : MonoBehaviour
     {
@@ -41,6 +41,13 @@ namespace RiverDeutsch.UI.Table
         private VisualElement pendingCardOverlay;
         private VisualElement pendingCardSlot;
         private Button discardPendingButton;
+        private VisualElement powerPopupOverlay;
+        private VisualElement powerPopupIcon;
+        private Label powerPopupNameLabel;
+        private Label powerPopupDescriptionLabel;
+        private VisualElement countdownOverlay;
+        private VisualElement countdownPlayers;
+        private Label countdownNumberLabel;
 
         private GameStateDto latestState;
         private string lastToastKey;
@@ -49,6 +56,7 @@ namespace RiverDeutsch.UI.Table
         private string pendingAction;
         private GameStateDto pendingState;
         private bool pendingCardOverlayWasShown;
+        private int powerPopupToken;
 
         private string LocalPlayerName => NetworkGameSession.Instance != null ? NetworkGameSession.Instance.LocalPlayerName : null;
 
@@ -78,6 +86,13 @@ namespace RiverDeutsch.UI.Table
             pendingCardOverlay = root.Q<VisualElement>("pending-card-overlay");
             pendingCardSlot = root.Q<VisualElement>("pending-card-slot");
             discardPendingButton = root.Q<Button>("discard-pending-button");
+            powerPopupOverlay = root.Q<VisualElement>("power-popup-overlay");
+            powerPopupIcon = root.Q<VisualElement>("power-popup-icon");
+            powerPopupNameLabel = root.Q<Label>("power-popup-name");
+            powerPopupDescriptionLabel = root.Q<Label>("power-popup-description");
+            countdownOverlay = root.Q<VisualElement>("countdown-overlay");
+            countdownPlayers = root.Q<VisualElement>("countdown-players");
+            countdownNumberLabel = root.Q<Label>("countdown-number");
 
             Texture2D tableBg = CardSpriteLoader.GetTableBackground();
             if (tableBg != null) tableRoot.style.backgroundImage = new StyleBackground(tableBg);
@@ -153,6 +168,12 @@ namespace RiverDeutsch.UI.Table
             }
 
             RenderBoard(dto, previous);
+            MaybeShowPowerPopup(dto, previous);
+
+            if (action == "GAME_STARTED")
+            {
+                StartCoroutine(PlayStartCountdown(dto));
+            }
         }
 
         private void HandleDeutschCalled(string callerName)
@@ -331,6 +352,94 @@ namespace RiverDeutsch.UI.Table
             shutdownButton.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
+        // ── POWER POPUP ──────────────────────────────────────────────────────
+
+        private void MaybeShowPowerPopup(GameStateDto dto, GameStateDto previous)
+        {
+            bool wasWaiting = previous != null && previous.CurrentState == "WaitingForPowerTarget";
+            bool isWaiting = dto.CurrentState == "WaitingForPowerTarget";
+            if (isWaiting && !wasWaiting && dto.ActivePowerCard != null)
+            {
+                ShowPowerPopup(dto.ActivePowerCard.Power);
+            }
+        }
+
+        private void ShowPowerPopup(string power)
+        {
+            Texture2D icon = CardSpriteLoader.GetPowerIcon(power);
+            if (icon != null) powerPopupIcon.style.backgroundImage = new StyleBackground(icon);
+            powerPopupNameLabel.text = GetPowerName(power);
+            powerPopupDescriptionLabel.text = GetPowerDescription(power);
+
+            powerPopupOverlay.style.display = DisplayStyle.Flex;
+            powerPopupOverlay.style.scale = new Scale(new Vector3(0.9f, 0.9f, 1f));
+            StartCoroutine(ScaleRoutine(powerPopupOverlay, 0.9f, 1f, 0.15f, clearAtEnd: true));
+
+            int token = ++powerPopupToken;
+            StartCoroutine(HidePowerPopupAfterDelay(token));
+        }
+
+        private IEnumerator HidePowerPopupAfterDelay(int token)
+        {
+            yield return new WaitForSecondsRealtime(2.6f);
+            if (token == powerPopupToken) powerPopupOverlay.style.display = DisplayStyle.None;
+        }
+
+        private static string GetPowerName(string power) => power switch
+        {
+            "PeekRiver" => "VISION RIVIERE",
+            "PeekOpponent" => "VISION ADVERSAIRE",
+            "Peek" => "VISION LIBRE",
+            "Swap" => "ECHANGE",
+            "Attack" => "ATTAQUE",
+            _ => "POUVOIR",
+        };
+
+        private static string GetPowerDescription(string power) => power switch
+        {
+            "PeekRiver" => "Regardez une carte face cachee de la Riviere.",
+            "PeekOpponent" => "Regardez une carte face cachee d'un adversaire.",
+            "Peek" => "Regardez n'importe quelle carte : votre jeu, un adversaire ou la Riviere.",
+            "Swap" => "Echangez une de vos cartes avec celle d'un adversaire.\nCliquez sur une de vos cartes, puis sur celle d'un adversaire.",
+            "Attack" => "Un adversaire de votre choix pioche une carte supplementaire.",
+            _ => "",
+        };
+
+        // ── START COUNTDOWN ──────────────────────────────────────────────────
+
+        private IEnumerator PlayStartCountdown(GameStateDto dto)
+        {
+            countdownPlayers.Clear();
+            foreach (PlayerDto p in dto.Players)
+            {
+                bool isMe = p.Name == LocalPlayerName;
+                var label = new Label(p.Name.ToUpper() + (isMe ? " (VOUS)" : ""));
+                label.AddToClassList("countdown-player-label");
+                if (isMe) label.style.color = new Color(0.91f, 0.64f, 0.24f);
+                countdownPlayers.Add(label);
+            }
+
+            countdownOverlay.style.display = DisplayStyle.Flex;
+
+            for (int i = 5; i >= 1; i--)
+            {
+                countdownNumberLabel.text = i.ToString();
+                yield return WaitRealtime(1f);
+            }
+
+            countdownOverlay.style.display = DisplayStyle.None;
+        }
+
+        private static IEnumerator WaitRealtime(float seconds)
+        {
+            float elapsed = 0f;
+            while (elapsed < seconds)
+            {
+                elapsed += Mathf.Min(Time.unscaledDeltaTime, StepSeconds);
+                yield return null;
+            }
+        }
+
         // ── HELPERS ──────────────────────────────────────────────────────────
 
         private static List<CardDto> FindHand(GameStateDto state, string playerName)
@@ -364,8 +473,8 @@ namespace RiverDeutsch.UI.Table
             if (large) slot.AddToClassList("card-slot--large");
             if (smaller)
             {
-                slot.style.width = 50;
-                slot.style.height = 72;
+                slot.style.width = 64;
+                slot.style.height = 92;
             }
 
             bool justRevealed = previousCard != null && previousCard.Known != card.Known;

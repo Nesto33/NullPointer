@@ -22,9 +22,20 @@ namespace RiverDeutsch.UI.Shared
             return Load("Cards/back");
         }
 
-        public static Texture2D GetPowerIcon(string powerName)
+        /// <summary>Accepts a Card.PowerType name (e.g. "PeekRiver") and maps it to the
+        /// original asset's SCREAMING_SNAKE_CASE filename (e.g. "PEEK_RIVER.png").</summary>
+        public static Texture2D GetPowerIcon(string powerTypeName)
         {
-            return Load($"Powers/{powerName}");
+            string fileName = powerTypeName switch
+            {
+                "PeekRiver" => "PEEK_RIVER",
+                "PeekOpponent" => "PEEK_OPPONENT",
+                "Peek" => "PEEK",
+                "Swap" => "SWAP",
+                "Attack" => "ATTACK",
+                _ => powerTypeName,
+            };
+            return Load($"Powers/{fileName}");
         }
 
         public static Texture2D GetTableBackground()

@@ -1,0 +1,71 @@
+/*
+ * Shared "Mystery Machine Glitch" theme — anything more than one screen uses.
+ * Linked from every screen's UXML alongside its own screen-specific USS.
+ *   fond      #1A1108 (brun tres sombre)
+ *   accent A  #E8A33D (moutarde)
+ *   accent B  #C1440E (orange brule)
+ *   support   #5C6B3D (olive)
+ *   texte     #F5EBD8 (creme)
+ */
+
+.menu-btn {
+    background-color: rgba(0, 0, 0, 0.55);
+    color: rgb(245, 235, 216);
+    border-left-width: 3px;
+    border-right-width: 3px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-left-color: rgb(232, 163, 61);
+    border-right-color: rgb(232, 163, 61);
+    border-top-color: rgb(232, 163, 61);
+    border-bottom-color: rgb(232, 163, 61);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    padding: 8px 20px;
+    margin-top: 10px;
+    rotate: -2deg;
+    -unity-text-align: middle-center;
+    font-size: 18px;
+    transition-property: background-color, color, border-left-color, border-right-color, border-top-color, border-bottom-color, rotate, scale;
+    transition-duration: 0.15s;
+}
+
+.menu-btn:hover {
+    background-color: rgb(232, 163, 61);
+    color: rgb(26, 17, 8);
+    border-left-color: rgb(193, 68, 14);
+    border-right-color: rgb(193, 68, 14);
+    border-top-color: rgb(193, 68, 14);
+    border-bottom-color: rgb(193, 68, 14);
+    rotate: 0deg;
+    scale: 1.04 1.04;
+}
+
+.menu-btn--quit {
+    border-left-color: rgb(92, 107, 61);
+    border-right-color: rgb(92, 107, 61);
+    border-top-color: rgb(92, 107, 61);
+    border-bottom-color: rgb(92, 107, 61);
+    align-self: center;
+}
+
+.menu-btn--quit:hover {
+    background-color: rgb(92, 107, 61);
+    color: rgb(245, 235, 216);
+    border-left-color: rgb(193, 68, 14);
+    border-right-color: rgb(193, 68, 14);
+    border-top-color: rgb(193, 68, 14);
+    border-bottom-color: rgb(193, 68, 14);
+}
+
+.menu-btn--start {
+    align-self: center;
+}
+
+.menu-btn:disabled {
+    opacity: 0.35;
+    rotate: -2deg;
+    scale: 1 1;
+}
