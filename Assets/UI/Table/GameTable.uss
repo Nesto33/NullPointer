@@ -210,6 +210,78 @@
     right: 30px;
 }
 
+/* Docked reminder of the active power — persists for the whole targeting
+   window instead of flashing away, so the player can read it while acting. */
+.power-badge {
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(20, 13, 6, 0.85);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(193, 68, 14);
+    border-right-color: rgb(193, 68, 14);
+    border-top-color: rgb(193, 68, 14);
+    border-bottom-color: rgb(193, 68, 14);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    padding: 6px 12px;
+    display: none;
+}
+
+.power-badge-icon {
+    width: 24px;
+    height: 24px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: 8px;
+}
+
+.power-badge-name {
+    color: rgb(232, 163, 61);
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+/* Whole-player click target for powers like Attack that don't target a
+   specific card — a soft highlight around the player's whole area instead
+   of every card lighting up individually. */
+.opponent-zone {
+    align-items: center;
+    padding: 8px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    transition-property: border-left-color, border-right-color, border-top-color, border-bottom-color, background-color;
+    transition-duration: 0.15s;
+}
+
+.opponent-zone--targetable {
+    border-left-color: rgb(193, 68, 14);
+    border-right-color: rgb(193, 68, 14);
+    border-top-color: rgb(193, 68, 14);
+    border-bottom-color: rgb(193, 68, 14);
+    background-color: rgba(193, 68, 14, 0.12);
+}
+
+.opponent-zone--targetable:hover {
+    background-color: rgba(193, 68, 14, 0.22);
+}
+
 .toast-layer {
     align-items: center;
     justify-content: center;

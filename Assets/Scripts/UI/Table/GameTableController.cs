@@ -48,6 +48,9 @@ namespace RiverDeutsch.UI.Table
         private VisualElement countdownOverlay;
         private VisualElement countdownPlayers;
         private Label countdownNumberLabel;
+        private VisualElement powerBadge;
+        private VisualElement powerBadgeIcon;
+        private Label powerBadgeNameLabel;
 
         private GameStateDto latestState;
         private string lastToastKey;
@@ -93,6 +96,9 @@ namespace RiverDeutsch.UI.Table
             countdownOverlay = root.Q<VisualElement>("countdown-overlay");
             countdownPlayers = root.Q<VisualElement>("countdown-players");
             countdownNumberLabel = root.Q<Label>("countdown-number");
+            powerBadge = root.Q<VisualElement>("power-badge");
+            powerBadgeIcon = root.Q<VisualElement>("power-badge-icon");
+            powerBadgeNameLabel = root.Q<Label>("power-badge-name");
 
             Texture2D tableBg = CardSpriteLoader.GetTableBackground();
             if (tableBg != null) tableRoot.style.backgroundImage = new StyleBackground(tableBg);
@@ -211,6 +217,7 @@ namespace RiverDeutsch.UI.Table
             RenderPiles(dto);
             RenderPendingCardOverlay(dto, isMyTurn);
             RenderShutdownButton(isMyTurn, hasPending, powerWaiting, dto);
+            RenderPowerBadge(dto, powerWaiting);
         }
 
         private void RenderTurnIndicator(GameStateDto dto, bool isMyTurn)
@@ -231,7 +238,7 @@ namespace RiverDeutsch.UI.Table
                 int cardIndex = i;
                 CardDto card = localPlayer.Hand[i];
                 CardDto previousCard = SameLength(previousHand, localPlayer.Hand) ? previousHand[i] : null;
-                VisualElement slot = CreateCardSlot(card, previousCard, large: false);
+                VisualElement slot = CreateCardSlot(card, previousCard, large: false, sway: true, swayPhase: i * 0.9f);
 
                 if (powerWaiting && isMyTurn && IsHandTargetable(activePower, isOpponent: false))
                 {
@@ -272,7 +279,7 @@ namespace RiverDeutsch.UI.Table
                 slotIndex++;
 
                 var column = new VisualElement();
-                column.style.alignItems = Align.Center;
+                column.AddToClassList("opponent-zone");
 
                 var nameLabel = new Label(player.Name.ToUpper());
                 nameLabel.AddToClassList("player-label");
@@ -283,6 +290,12 @@ namespace RiverDeutsch.UI.Table
 
                 List<CardDto> previousHand = FindHand(previous, player.Name);
 
+                // Attack doesn't target a specific card — it targets the player — so the
+                // whole zone becomes the click target instead of highlighting every card,
+                // which used to read as "pick one of these" when it wasn't the case.
+                bool wholeZoneTargetable = powerWaiting && isMyTurn && activePower == "Attack";
+                bool perCardTargetable = powerWaiting && isMyTurn && IsHandTargetable(activePower, isOpponent: true) && activePower != "Attack";
+
                 int capturedPlayerIndex = playerIndex;
                 for (int i = 0; i < player.Hand.Count; i++)
                 {
@@ -291,13 +304,19 @@ namespace RiverDeutsch.UI.Table
                     CardDto previousCard = SameLength(previousHand, player.Hand) ? previousHand[i] : null;
                     VisualElement slot = CreateCardSlot(card, previousCard, large: false, smaller: true);
 
-                    if (powerWaiting && isMyTurn && IsHandTargetable(activePower, isOpponent: true))
+                    if (perCardTargetable)
                     {
                         MarkTargetable(slot);
                         slot.RegisterCallback<ClickEvent>(_ => OnCardClicked(slot, () => NetworkGameSession.Instance.PowerTargetPlayerServerRpc(capturedPlayerIndex, cardIndex)));
                     }
 
                     row.Add(slot);
+                }
+
+                if (wholeZoneTargetable)
+                {
+                    MarkZoneTargetable(column);
+                    column.RegisterCallback<ClickEvent>(_ => OnCardClicked(column, () => NetworkGameSession.Instance.PowerTargetPlayerServerRpc(capturedPlayerIndex, 0)));
                 }
 
                 column.Add(row);
@@ -352,6 +371,22 @@ namespace RiverDeutsch.UI.Table
             shutdownButton.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
+        /// <summary>Small persistent reminder (icon + name) docked next to the turn
+        /// indicator for as long as a power is actually active — unlike the intro
+        /// popup below, this is purely state-driven so it can never linger or vanish
+        /// out of sync with the real WaitingForPowerTarget state.</summary>
+        private void RenderPowerBadge(GameStateDto dto, bool powerWaiting)
+        {
+            bool show = powerWaiting && dto.ActivePowerCard != null;
+            powerBadge.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!show) return;
+
+            string power = dto.ActivePowerCard.Power;
+            Texture2D icon = CardSpriteLoader.GetPowerIcon(power);
+            if (icon != null) powerBadgeIcon.style.backgroundImage = new StyleBackground(icon);
+            powerBadgeNameLabel.text = GetPowerName(power);
+        }
+
         // ── POWER POPUP ──────────────────────────────────────────────────────
 
         private void MaybeShowPowerPopup(GameStateDto dto, GameStateDto previous)
@@ -375,13 +410,15 @@ namespace RiverDeutsch.UI.Table
             powerPopupOverlay.style.scale = new Scale(new Vector3(0.9f, 0.9f, 1f));
             StartCoroutine(ScaleRoutine(powerPopupOverlay, 0.9f, 1f, 0.15f, clearAtEnd: true));
 
+            // Brief intro flash only — the docked power-badge (state-driven, see
+            // RenderPowerBadge) is what stays on screen for the rest of the targeting.
             int token = ++powerPopupToken;
             StartCoroutine(HidePowerPopupAfterDelay(token));
         }
 
         private IEnumerator HidePowerPopupAfterDelay(int token)
         {
-            yield return new WaitForSecondsRealtime(2.6f);
+            yield return new WaitForSecondsRealtime(1.8f);
             if (token == powerPopupToken) powerPopupOverlay.style.display = DisplayStyle.None;
         }
 
@@ -466,7 +503,7 @@ namespace RiverDeutsch.UI.Table
             };
         }
 
-        private VisualElement CreateCardSlot(CardDto card, CardDto previousCard, bool large, bool smaller = false)
+        private VisualElement CreateCardSlot(CardDto card, CardDto previousCard, bool large, bool smaller = false, bool sway = false, float swayPhase = 0f)
         {
             var slot = new VisualElement();
             slot.AddToClassList("card-slot");
@@ -480,8 +517,26 @@ namespace RiverDeutsch.UI.Table
             bool justRevealed = previousCard != null && previousCard.Known != card.Known;
             ApplyCardVisual(slot, justRevealed ? previousCard : card);
             if (justRevealed) StartCoroutine(FlipRoutine(slot, card));
+            if (sway) StartCoroutine(SwayRoutine(slot, swayPhase));
 
             return slot;
+        }
+
+        /// <summary>Small idle rotate/bob loop so hand cards feel alive even when
+        /// nobody's interacting with them, each on its own phase so they don't all
+        /// move in lockstep. Stops on its own once the slot leaves the panel.</summary>
+        private static IEnumerator SwayRoutine(VisualElement slot, float phase)
+        {
+            float t = phase;
+            while (slot.panel != null)
+            {
+                t += Mathf.Min(Time.unscaledDeltaTime, StepSeconds);
+                float angle = Mathf.Sin(t * 1.1f) * 1.5f;
+                float bob = Mathf.Sin(t * 1.4f + 1f) * 2f;
+                slot.style.rotate = new Rotate(angle);
+                slot.style.translate = new Translate(0, bob);
+                yield return null;
+            }
         }
 
         private static void ApplyCardVisual(VisualElement slot, CardDto card)
@@ -497,26 +552,33 @@ namespace RiverDeutsch.UI.Table
         {
             slot.AddToClassList("card-slot--targetable");
             slot.AddToClassList("card-slot--clickable");
-            StartCoroutine(PulseRoutine(slot));
+            StartCoroutine(PulseRoutine(slot, "card-slot--targetable", 1.07f));
         }
 
-        /// <summary>Breathing scale loop while a card is a valid power target; stops on
-        /// its own once the slot leaves the panel (next render's Clear()) or loses the
-        /// targetable class.</summary>
-        private static IEnumerator PulseRoutine(VisualElement slot)
-        {
-            while (slot.panel != null && slot.ClassListContains("card-slot--targetable"))
-            {
-                yield return ScaleRoutine(slot, 1f, 1.07f, 0.5f);
-                if (slot.panel == null) yield break;
-                yield return ScaleRoutine(slot, 1.07f, 1f, 0.5f);
-            }
-        }
-
-        private static void MarkSelectable(VisualElement slot)
+        private void MarkSelectable(VisualElement slot)
         {
             slot.AddToClassList("card-slot--selectable");
             slot.AddToClassList("card-slot--clickable");
+            StartCoroutine(PulseRoutine(slot, "card-slot--selectable", 1.07f));
+        }
+
+        private void MarkZoneTargetable(VisualElement zone)
+        {
+            zone.AddToClassList("opponent-zone--targetable");
+            StartCoroutine(PulseRoutine(zone, "opponent-zone--targetable", 1.03f));
+        }
+
+        /// <summary>Breathing scale loop while an element carries requiredClass (a valid
+        /// power target, a selectable swap card, ...); stops on its own once the element
+        /// leaves the panel (next render's Clear()) or loses that class.</summary>
+        private static IEnumerator PulseRoutine(VisualElement element, string requiredClass, float peakScale)
+        {
+            while (element.panel != null && element.ClassListContains(requiredClass))
+            {
+                yield return ScaleRoutine(element, 1f, peakScale, 0.5f);
+                if (element.panel == null) yield break;
+                yield return ScaleRoutine(element, peakScale, 1f, 0.5f);
+            }
         }
 
         // ── ACTIONS ──────────────────────────────────────────────────────────

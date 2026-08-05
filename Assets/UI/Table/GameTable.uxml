@@ -43,6 +43,11 @@
                 <ui:Label name="turn-player-label" text="" class="turn-indicator-value" />
             </ui:VisualElement>
 
+            <ui:VisualElement name="power-badge" class="power-badge">
+                <ui:VisualElement name="power-badge-icon" class="power-badge-icon" />
+                <ui:Label name="power-badge-name" text="" class="power-badge-name" />
+            </ui:VisualElement>
+
             <ui:Button name="shutdown-button" text="SHUTDOWN !" class="menu-btn shutdown-btn" />
         </ui:VisualElement>
 
